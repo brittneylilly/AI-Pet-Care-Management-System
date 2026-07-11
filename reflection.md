@@ -5,11 +5,21 @@
 **a. Initial design**
 
 - Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+- What classes did you include, and what responsibilities did you assign to each? 
+I will include the following classes and respecitve responsibilities:
+1. Owner class to hold the owner's preferences such as their work and activity schedule and times they will be home to complete pet tasks
+2. Pet class to hold the pet's identifying information
+3. Task class to hold all the different types of activities and actions that need to be performed with the pet
+4. Planner class that generates a specific daily plan tailored to the owner's preferences and the pet's needs
+
+
+
 
 **b. Design changes**
 
 - Did your design change during implementation?
+Yes, initially I had a 5th class, 
+
 - If yes, describe at least one change and why you made it.
 
 ---
@@ -19,7 +29,10 @@
 **a. Constraints and priorities**
 
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
+The constraints that my scheduler considers is primarily constraints related to the Owner, such as their work and activity schedule and their sleep schedule.
+
 - How did you decide which constraints mattered most?
+Because this app is intended to help busy pet owners stay consistent with pet care, the owner's ability to manage their scheduling constraints while still maintaining their pet's care is the primary reason why someone would use this app. 
 
 **b. Tradeoffs**
 
