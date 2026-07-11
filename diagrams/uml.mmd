@@ -12,4 +12,30 @@ classDiagram
         +method() returnType
     }
 
+<<<<<<< Updated upstream
     ClassName --> AnotherClass : relationship
+=======
+    class Task {
+        +str name
+        +int duration
+        +str priority
+        +str category
+        +str recurrence
+        +bool completed
+        +is_due_today() bool
+    }
+
+    class Scheduler {
+        +get_tasks_for_owner(owner: Owner) list~Task~
+        +sort_by_priority(tasks: list~Task~) list~Task~
+        +filter_by_time(tasks: list~Task~, available_minutes: int) list~Task~
+        +generate_plan(tasks: list~Task~, available_minutes: int) list~Task~
+        +generate_plan_for_owner(owner: Owner) list~Task~
+        +explain(task: Task) str
+    }
+
+    Owner "1" --> "*" Pet : has
+    Pet "1" --> "*" Task : has
+    Scheduler ..> Task : schedules
+    Scheduler ..> Owner : retrieves tasks from
+>>>>>>> Stashed changes

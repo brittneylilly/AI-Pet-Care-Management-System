@@ -10,7 +10,14 @@
 **b. Design changes**
 
 - Did your design change during implementation?
+<<<<<<< Updated upstream
+=======
+Yes, initially I had a 5th class called Plan which I intended to be used to show skipped tasks, however I decided it was simpler to incorporate this class' functionality into the Planner class.
+
+>>>>>>> Stashed changes
 - If yes, describe at least one change and why you made it.
+Instead of having a separate "Plan" class, I eliminated this class and decided to put a generate_plan() method in the Planner class to handle
+the functionality that was intended for the Plan class.
 
 ---
 
