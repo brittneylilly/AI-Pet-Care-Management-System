@@ -1,0 +1,63 @@
+classDiagram
+    class Owner {
+        +str name
+        +int available_minutes
+        +dict preferences
+        +list~Pet~ pets
+        +add_pet(pet: Pet) None
+        +remove_pet(pet: Pet) None
+        +get_pets() list~Pet~
+        +get_all_tasks() list~Task~
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +str breed
+        +int age
+        +list~Task~ tasks
+        +add_task(task: Task) None
+        +remove_task(task: Task) None
+        +get_tasks() list~Task~
+        +mark_task_complete(task: Task, today: date) None
+    }
+
+    class Task {
+        +str name
+        +int duration
+        +str priority
+        +str category
+        +str recurrence
+        +bool completed
+        +date due_date
+        +str scheduled_time
+        +is_due_today(today: date) bool
+        +mark_complete(today: date) Task
+        -_next_occurrence(completed_date: date) Task
+    }
+
+    class Scheduler {
+        +get_tasks_for_owner(owner: Owner) list~Task~
+        +get_tasks_for_pet(pet: Pet) list~Task~
+        +sort_by_priority(tasks: list~Task~) list~Task~
+        +sort_by_duration(tasks: list~Task~) list~Task~
+        +sort_by_time(tasks: list~Task~) list~Task~
+        +filter_by_status(tasks: list~Task~, completed: bool) list~Task~
+        +filter_by_pet_name(owner: Owner, pet_name: str) list~Task~
+        +filter_by_time(tasks: list~Task~, available_minutes: int) tuple
+        +find_duplicate_tasks(tasks: list~Task~) list~Task~
+        +find_time_conflicts(tasks: list~Task~) list~str~
+        +find_overloaded_priority(tasks: list~Task~, available_minutes: int) str
+        +detect_conflicts(tasks: list~Task~, available_minutes: int) list~str~
+        +generate_plan(tasks: list~Task~, available_minutes: int) tuple
+        +generate_plan_for_owner(owner: Owner) tuple
+        +explain(task: Task) str
+        -_start_minutes(task: Task) int
+    }
+
+    Owner "1" --> "*" Pet : has
+    Pet "1" --> "*" Task : has
+    Task ..> Task : mark_complete() creates next occurrence
+    Scheduler ..> Task : sorts, filters, and schedules
+    Scheduler ..> Pet : reads tasks from
+    Scheduler ..> Owner : retrieves tasks from

@@ -89,6 +89,12 @@ if owner.get_pets():
     with col3:
         priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
 
+    col4, col5 = st.columns(2)
+    with col4:
+        recurrence = st.selectbox("Repeats", ["once", "daily", "weekly"], index=1)
+    with col5:
+        task_time = st.time_input("Time of day", value=None)
+
     if st.button("Add task"):
         selected_pet.add_task(
             Task(
@@ -96,21 +102,62 @@ if owner.get_pets():
                 duration=int(duration),
                 priority=priority,
                 category="general",
-                recurrence="daily",
+                recurrence=recurrence,
+                scheduled_time=task_time.strftime("%H:%M") if task_time else None,
             )
         )
         st.success(f"Added '{task_title}' to {selected_pet.name}.")
 
+    scheduler = Scheduler()
     all_tasks = owner.get_all_tasks()
+
     if all_tasks:
         st.write("Current tasks:")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            sort_choice = st.selectbox("Sort by", ["Priority", "Duration", "Time of day"])
+        with col2:
+            status_choice = st.selectbox("Show", ["All", "Incomplete", "Completed"])
+
+        view_tasks = all_tasks
+        if status_choice == "Incomplete":
+            view_tasks = scheduler.filter_by_status(view_tasks, completed=False)
+        elif status_choice == "Completed":
+            view_tasks = scheduler.filter_by_status(view_tasks, completed=True)
+
+        if sort_choice == "Priority":
+            view_tasks = scheduler.sort_by_priority(view_tasks)
+        elif sort_choice == "Duration":
+            view_tasks = scheduler.sort_by_duration(view_tasks)
+        else:
+            view_tasks = scheduler.sort_by_time(view_tasks)
+
+        pet_by_task_name = {t.name: p.name for p in owner.get_pets() for t in p.get_tasks()}
         st.table(
             [
-                {"pet": p.name, "task": t.name, "duration_minutes": t.duration, "priority": t.priority}
-                for p in owner.get_pets()
-                for t in p.get_tasks()
+                {
+                    "pet": pet_by_task_name.get(t.name, ""),
+                    "task": t.name,
+                    "time": t.scheduled_time or "—",
+                    "duration_minutes": t.duration,
+                    "priority": t.priority,
+                    "status": "done" if t.completed else "pending",
+                }
+                for t in view_tasks
             ]
         )
+
+        incomplete_tasks = scheduler.filter_by_status(all_tasks, completed=False)
+        if incomplete_tasks:
+            task_to_complete = st.selectbox(
+                "Mark a task complete", [t.name for t in incomplete_tasks], key="complete_task_select"
+            )
+            if st.button("Mark complete"):
+                task_obj = next(t for t in incomplete_tasks if t.name == task_to_complete)
+                owning_pet = next(p for p in owner.get_pets() if task_obj in p.get_tasks())
+                owning_pet.mark_task_complete(task_obj)
+                st.success(f"Marked '{task_to_complete}' complete. If it repeats, the next one is already scheduled.")
     else:
         st.info("No tasks yet. Add one above.")
 else:
@@ -123,21 +170,36 @@ st.caption("Generates today's plan from all pets' tasks using the Scheduler.")
 
 if st.button("Generate schedule"):
     scheduler = Scheduler()
-    plan, skipped = scheduler.generate_plan_for_owner(owner)
+    due_today = scheduler.get_tasks_for_owner(owner)
 
-    conflicts = scheduler.detect_conflicts(owner.get_all_tasks(), owner.available_minutes)
-    for conflict in conflicts:
-        st.error(conflict)
+    duplicates = scheduler.find_duplicate_tasks(due_today)
+    if duplicates:
+        names = ", ".join(f"'{task.name}'" for task in duplicates)
+        st.warning(f"🔁 Duplicate task(s) — you may have added these by accident: {names}")
+
+    for message in scheduler.find_time_conflicts(due_today):
+        st.warning(f"⏰ {message}")
+
+    overload_warning = scheduler.find_overloaded_priority(due_today, owner.available_minutes)
+    if overload_warning:
+        st.warning(f"⌛ {overload_warning} Consider freeing up more time or lowering a task's priority.")
+
+    plan, skipped = scheduler.generate_plan(due_today, owner.available_minutes)
 
     if plan:
         st.write(f"Today's Schedule for {owner.name} ({owner.available_minutes} minutes available):")
+        st.table(
+            [
+                {"time": t.scheduled_time or "—", "task": t.name, "duration_minutes": t.duration, "priority": t.priority}
+                for t in plan
+            ]
+        )
         for task in plan:
-            st.markdown(f"- **{task.name}** — {task.duration} min [{task.priority} priority]")
             st.caption(scheduler.explain(task))
+        st.success(f"Scheduled {sum(t.duration for t in plan)} of {owner.available_minutes} available minutes.")
     else:
         st.warning("No tasks fit in the available time. Add tasks or increase available minutes.")
 
     if skipped:
         st.write("Skipped (ran out of time):")
-        for task in skipped:
-            st.markdown(f"- {task.name} — {task.duration} min [{task.priority} priority]")
+        st.table([{"task": t.name, "duration_minutes": t.duration, "priority": t.priority} for t in skipped])

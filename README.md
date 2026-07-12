@@ -145,6 +145,12 @@ tests/test_pawpal.py::test_find_time_conflicts_detects_tasks_at_the_exact_same_s
 ============================= 10 passed in 0.05s ==============================
 ```
 
+## 🗺️ System Architecture (UML)
+
+The diagram below ([diagrams/uml_final.mmd](diagrams/uml_final.mmd)) reflects the final code in `pawpal_system.py`, including the methods and relationships added while building out sorting, filtering, recurrence, and conflict detection.
+
+![PawPal+ class diagram](diagrams/uml_final.png)
+
 ## 📐 Smarter Scheduling
 
 > Fill in once you've implemented scheduling logic.
@@ -168,6 +174,65 @@ Describe app in numbered steps so a reader can follow along without watching a v
 6. If something doesn't fit or two tasks are scheduled at the same time, the app warns you instead of just leaving it out silently.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
+
+### Main UI Features, Example Workflow, Key Scheduler behaviors shown, sample CLI output from running main.py:
+
+The app lets you set up an owner and how much time they have today, add one or more pets, and give each pet a list of tasks (with a duration, a priority, an optional time of day, and how often it repeats). From there you can sort or filter the task list, mark a task done, and generate today's schedule.
+
+**Example workflow:** add a pet named "Mochi" → add a task "Morning walk" for Mochi (20 min, high priority, repeats daily) → click "Generate schedule" → see today's plan, in priority order, along with any warnings if something doesn't fit or two tasks collide.
+
+Along the way, you can see the Scheduler's behaviors directly: tasks get **sorted** by priority, duration, or time of day; you can **filter** the list down to just one pet or just unfinished tasks; **conflicts** (duplicates, overlapping times, or too much high-priority work for the day) show up as warnings instead of silently breaking the plan; and marking a repeating task done automatically lines up its next occurrence.
+
+Here's the same behaviors, shown from the command line (`python main.py`):
+
+```
+Today's Schedule for Jordan (60 minutes available)
+==================================================
+- Vet checkup           15 min  [high priority]  (health)
+    -> Vet checkup (high priority, 15 min) scheduled for health.
+- Morning walk          30 min  [high priority]  (walk)
+    -> Morning walk (high priority, 30 min) scheduled for walk.
+- Litter box cleaning   15 min  [medium priority]  (grooming)
+    -> Litter box cleaning (medium priority, 15 min) scheduled for grooming.
+--------------------------------------------------
+Total scheduled time: 60 / 60 minutes
+
+Skipped (ran out of time):
+- Evening walk (20 min, medium priority)
+- Playtime (20 min, low priority)
+
+Conflicts:
+- Time conflict: 'Playtime' (09:00, 20 min) overlaps with 'Vet checkup' (09:15, 15 min)
+
+==================================================
+Sorted by time of day:
+- 07:30  Morning walk (30 min)
+- 08:00  Feeding (10 min)
+- 08:00  Feeding (10 min)
+- 09:00  Playtime (20 min)
+- 09:15  Vet checkup (15 min)
+- 12:00  Litter box cleaning (15 min)
+- 18:00  Evening walk (20 min)
+
+Incomplete tasks (filter_by_status):
+- Evening walk
+- Morning walk
+- Vet checkup
+- Feeding
+- Litter box cleaning
+- Playtime
+
+Biscuit's tasks (filter_by_pet_name):
+- Evening walk
+- Feeding
+- Morning walk
+- Vet checkup
+- Feeding
+
+All of Biscuit's Feeding occurrences (completing spawns the next one):
+- completed=True, due_date=2026-07-12
+- completed=False, due_date=2026-07-13
+```
 
 ## Smarter Scheduling:
 
