@@ -105,10 +105,44 @@ pytest
 pytest --cov
 ```
 
-Sample test output:
+# Command to run tests:
+python -m pytest
+
+# Description of what the tests cover:
+
+My tests check that the app behaves correctly in 10 different situations:
+
+1. Marking a task done actually flips its status
+2. Adding a task to a pet actually shows up in that pet's list
+3. The schedule picks the most important tasks first and stops once the day's time runs out
+4. A pet with no tasks doesn't break anything — it just returns an empty plan
+5. A day with zero free minutes correctly skips everything instead of crashing
+6. Finishing a daily task automatically lines up tomorrow's version of that same task
+7. Finishing a one-time task (like a vet visit) does not keep coming back
+8. A task due exactly today is correctly treated as "due," not accidentally skipped
+9. Tasks scheduled at different times come back sorted in the right order, earliest first
+10. Two tasks accidentally scheduled for the same time get flagged with a warning
+
+Together, these 10 tests confirm the app handles both the everyday cases (adding tasks, building a normal schedule) and the tricky edge cases (empty pets, no time left, exact-time conflicts) without breaking or giving a misleading plan.
 
 ```
-# Paste your pytest output here
+#Paste your pytest output here:
+
+============================= test session starts =============================
+collected 10 items
+
+tests/test_pawpal.py::test_mark_complete_changes_status PASSED           [ 10%]
+tests/test_pawpal.py::test_add_task_increases_pet_task_count PASSED      [ 20%]
+tests/test_pawpal.py::test_generate_plan_prioritizes_and_fits_available_time PASSED [ 30%]
+tests/test_pawpal.py::test_generate_plan_with_no_tasks_returns_empty_plan PASSED [ 40%]
+tests/test_pawpal.py::test_filter_by_time_skips_everything_when_no_minutes_available PASSED [ 50%]
+tests/test_pawpal.py::test_mark_task_complete_schedules_next_occurrence_one_day_later PASSED [ 60%]
+tests/test_pawpal.py::test_mark_task_complete_does_not_recur_for_one_time_tasks PASSED [ 70%]
+tests/test_pawpal.py::test_is_due_today_is_true_when_due_date_is_exactly_today PASSED [ 80%]
+tests/test_pawpal.py::test_sort_by_time_returns_tasks_in_chronological_order PASSED [ 90%]
+tests/test_pawpal.py::test_find_time_conflicts_detects_tasks_at_the_exact_same_start_time PASSED [100%]
+
+============================= 10 passed in 0.05s ==============================
 ```
 
 ## 📐 Smarter Scheduling
