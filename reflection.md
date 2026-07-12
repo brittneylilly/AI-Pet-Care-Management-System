@@ -28,7 +28,10 @@ the functionality that was intended for the Plan class.
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
+A tradeoff my scheduler makes is picking tasks one at a time in priority order and never reconsidering earlier choices, instead of checking every possible combination for the best fit.
+
 - Why is that tradeoff reasonable for this scenario?
+The tradeoff mentioned is reasonable for this scenario because the pet owner needs a quick and trustworthy daily plan, rather than a perfectly optimized one. 
 
 ---
 

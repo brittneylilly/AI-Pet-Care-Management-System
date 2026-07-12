@@ -123,7 +123,11 @@ st.caption("Generates today's plan from all pets' tasks using the Scheduler.")
 
 if st.button("Generate schedule"):
     scheduler = Scheduler()
-    plan = scheduler.generate_plan_for_owner(owner)
+    plan, skipped = scheduler.generate_plan_for_owner(owner)
+
+    conflicts = scheduler.detect_conflicts(owner.get_all_tasks(), owner.available_minutes)
+    for conflict in conflicts:
+        st.error(conflict)
 
     if plan:
         st.write(f"Today's Schedule for {owner.name} ({owner.available_minutes} minutes available):")
@@ -132,3 +136,8 @@ if st.button("Generate schedule"):
             st.caption(scheduler.explain(task))
     else:
         st.warning("No tasks fit in the available time. Add tasks or increase available minutes.")
+
+    if skipped:
+        st.write("Skipped (ran out of time):")
+        for task in skipped:
+            st.markdown(f"- {task.name} — {task.duration} min [{task.priority} priority]")
